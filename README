@@ -1,0 +1,31 @@
+From the original blog post
+(http://aaronboodman-com-v1.blogspot.com/2008/12/introducing-nerdsz.html):
+
+===
+
+Sunday, December 7, 2008
+Introducing nerdsz
+
+For awhile now, I've been wanting something that could answer the question:
+"What are my friends doing right now?"
+
+There are probably already approximately 200 apps that do this, but for some
+reason I couldn't find one that worked the way I wanted. So instead I took the
+evening and hacked together nerdsz (pronounced "nerds-zee").
+
+To use it, enter the twitter usernames of a group of people you're interested
+in. For example, http://aaronboodman.com/nerdsz?aboodman,ev,biz,goldman. 
+
+PS: You may be wondering about the name. For years now, I have been calling the
+group of friends I hang out with the nerds. The z is an inside joke that you
+probably have to work for Google to get. Sorry about that.
+
+PPS: This hack made possible by twitter's awesome, crazy-easy-to-use API.
+Thanks!
+
+PPPS: I also borrowed John Resig's PrettyDate.
+
+===
+
+As of this commit, it looks like the Twitter API has changed, so this no longer
+works.

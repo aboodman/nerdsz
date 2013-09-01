@@ -1,0 +1,212 @@
+<html>
+<head>
+<title>nerdsz</title>
+<style type="text/css">
+body {
+  background:#4C525C;
+  color:white;
+  font-family:verdana;
+  margin:15px 20px;
+}
+a {
+  color:inherit!important;
+}
+a:hover {
+  background:#626873;
+}
+body, td {
+  font-size:11px;
+}
+#title {
+  font-family:'trebuchet ms';
+  font-size:16px;
+  color:#FFFD5A;
+}
+#title a {
+  text-decoration:none;
+}
+table {
+  margin-top:5px;
+  margin-left:-5px;
+}
+td {
+  min-width:150px;
+  border-top:1px solid #5D646E;
+  padding:10px;
+}
+td.name {
+  font-weight:bold;
+  font-size:12px;
+  width:60px;
+  max-width:60px;
+  min-width:0;
+  overflow:hidden;
+}
+.ago {
+  font-style:italic;
+  margin-top:5px;
+  color:#ccc;
+}
+#intro {
+  margin:10px 0;
+  display:none;
+}
+#usernames {
+  width:300px;
+  height:100px;
+  margin:5px 0 10px;
+}
+#error {
+  display:none;
+}
+</style>
+<script>
+var numUpdates = 5;
+
+function showQuery(query) {
+  query = query.split(",");
+  query.sort();
+  for (var i = 0; i < query.length; i++) {
+    fetchUser(query[i]);
+  }
+}
+
+function showIntro() {
+  document.getElementById("list").style.display = "none";
+  document.getElementById("intro").style.display = "block";
+}
+
+function addUserInfo(data) {
+  if (data.error) {
+    document.getElementById("error").innerHTML = "<b>Error:</b> " + data.error;
+    document.getElementById("error").style.display = "block";
+    return;
+  }
+
+  var tr = document.createElement("tr");
+
+  // user info
+  var td = document.createElement("td");
+  td.align = "left";
+  td.className = "name";
+  td.setAttribute("valign", "top");
+  var img = document.createElement("img");
+  img.style.border = "1px solid black";
+  img.src = data[0].user.profile_image_url;
+  td.appendChild(img);
+  td.appendChild(document.createElement("br"));
+  td.appendChild(document.createTextNode(data[0].user.screen_name));
+  tr.appendChild(td);
+
+  // updates
+  for (var i = 0, update; update = data[i]; i++) {
+    td = document.createElement("td");
+    td.setAttribute("valign", "top");
+    td.style.color = "#" + getGradientColor("FFFFFF", "4C525C", i / numUpdates);
+    linkify(update.text, td);
+    var ago = document.createElement("div");
+    ago.className = "ago";
+    ago.style.color = "#" + getGradientColor("CCCCCC", "4C525C", i / numUpdates);
+    ago.appendChild(document.createTextNode(prettyDate(update.created_at)));
+    td.appendChild(ago);
+    tr.appendChild(td);
+  }
+
+  document.getElementsByTagName("tbody")[0].appendChild(tr);
+}
+
+function linkify(text, parent) {
+  var urlRegex = /\b(https?:\/\/[^\s+\"\<\>]+)/ig;
+  if (!urlRegex.test(text)) {
+    parent.appendChild(document.createTextNode(text));
+    return;
+  }
+
+  urlRegex.lastIndex = 0;
+  for (var match = null, lastLastIndex = 0; (match = urlRegex.exec(text)); ) {
+      parent.appendChild(document.createTextNode(text.substring(lastLastIndex, match.index)));
+      
+      var a = document.createElement("a");
+      a.setAttribute("href", match[0]);
+      a.appendChild(document.createTextNode(match[0]));
+      parent.appendChild(a);
+
+      lastLastIndex = urlRegex.lastIndex;
+  }
+
+  parent.appendChild(document.createTextNode(text.substring(lastLastIndex)));
+  parent.normalize();
+}
+
+function getGradientColor(source, dest, percent) {
+  var result = "";
+  for (var i = 0; i < 3; i++) {
+    var sourceComponent = parseInt(source.substring(i * 2, (i+1) * 2), 16);
+    var destComponent = parseInt(dest.substring(i * 2, (i+1) * 2), 16);
+    var diff = destComponent - sourceComponent;
+    result += Number(sourceComponent + Math.round(diff * percent)).toString(16);
+  }
+  return result;
+}
+
+function fetchUser(username) {
+  var elm = document.createElement("script");
+  elm.src = "http://twitter.com/statuses/user_timeline/" + username + ".json?count=" + numUpdates + "&callback=addUserInfo";
+  document.body.appendChild(elm);
+}
+
+function handleButton() {
+  var rawText = document.getElementById("usernames").value;
+  location.search = "?" + rawText.replace(/\s+/g, ",");
+}
+
+/*
+ * JavaScript Pretty Date
+ * Copyright (c) 2008 John Resig (jquery.com)
+ * Licensed under the MIT license.
+ */
+
+// Takes an ISO time and returns a string representing how
+// long ago the date represents.
+function prettyDate(time){
+	var date = new Date(time),
+		diff = (((new Date()).getTime() - date.getTime()) / 1000),
+		day_diff = Math.floor(diff / 86400);
+			
+	if ( isNaN(day_diff) || day_diff < 0 || day_diff >= 365 )
+		return;
+			
+	return day_diff == 0 && (
+			diff < 60 && "just now" ||
+			diff < 120 && "1 minute ago" ||
+			diff < 3600 && Math.floor( diff / 60 ) + " minutes ago" ||
+			diff < 7200 && "1 hour ago" ||
+			diff < 86400 && Math.floor( diff / 3600 ) + " hours ago") ||
+		day_diff == 1 && "Yesterday" ||
+		day_diff < 7 && day_diff + " days ago" ||
+		day_diff < 365 && Math.ceil( day_diff / 7 ) + " weeks ago";
+}
+</script>
+</head>
+<body>
+<div id="title"><a href="?"><b>nerdsz</b></a></div>
+<table id="list" border="0" cellspacing="0" cellpadding="0">
+<tbody></tbody>
+</table>
+<div id="intro">
+Enter some twitter usernames:<br>
+<textarea id="usernames"></textarea><br>
+<button onclick="handleButton()">Get Statuses</button>
+</div>
+<div id="error"></div>
+</body>
+<script>
+var query = location.search;
+if (query) query = query.substring(1);
+if (query) {
+  showQuery(query);
+} else {
+  showIntro();
+}
+</script>
+</html>
